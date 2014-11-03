@@ -1,17 +1,20 @@
+#define _CRT_SECURE_NO_WARNINGS //Needed in vs to disable deprecation
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
-#  define INT_MAX   2147483647
-int infin = INT_MAX;
 
+
+
+int infin = INT_MAX;
 typedef struct node Node; //Synonyms Definition
 typedef Node *NodePtr;
 typedef struct priorityqueue Priorityqueue;
-
-
-
+typedef struct edge Edge;
+typedef Edge *EdgePtr;
 //Define Node structure in adjacency list
+
 struct node{
 	char name[30];
 	int dist;
@@ -20,37 +23,75 @@ struct node{
 	struct edge *edges[4];
 	char color;//w for white, g for gray, b for black
 	struct node *next;
-	struct node *parent;
+	struct node *parentn;
 };
-
 struct edge{
 	int weight;
 	char track;
 	struct node *adj;
 };
-
-
-void createnode(char name[30], NodePtr *Ptr);
-void joinnode(char node1[30], char node2[30], int weight, char track);
-void Dijiktra(char tart[3], char end[30]);
+void createnode(char *namePtr, NodePtr *Ptr);
+void joinnode(char *node1name, char *node2name, int weight, char track, Node *Ptr);
+void Dijikstra(char tart[3], char end[30]);
 void initialize();
 void relax();
 
 void main(){
 	printf("%d", infin);
+
+	NodePtr startPtr = NULL;
+	char city_name[30];
+	char city1[30];
+	char city2[30];
+	char line[5];
+	int dist;
+
+	char *city1Prt;
+	char *city2Ptr;
+	char *namePtr;
+	char *linePtr;
 	getchar();
 }
 
-void createnode(char name[30], NodePtr *Ptr){
+void createnode(char *namePtr, NodePtr *Ptr){
 	NodePtr currentPtr;
 	NodePtr previousPtr;
-	NodePtr nextPtr;
+	NodePtr newPtr;
+	newPtr = malloc(sizeof(Node));
+	if (newPtr != NULL){
+		strcpy(newPtr->name, namePtr);
+		newPtr->next = NULL;
+		newPtr->upper_bound = infin;
 
-	currentPtr = malloc(sizeof(Node));
+		previousPtr = NULL;
+		currentPtr = *Ptr;
 
-	if (currentPtr != NULL){}
-	else{
+		while (currentPtr != NULL){
+			previousPtr = currentPtr;
+			currentPtr = currentPtr->next;
+		}
+
+		if (previousPtr == NULL){
+			*Ptr = newPtr;
+		}
+
+		else{
+			currentPtr = newPtr;
+		}
+	}
+	else
+	{
 		printf("Not enough memory available. ");
 	}
+}
 
+void joinnode(char *node1name, char *node2name, int weight, char track, Node *Ptr){
+	EdgePtr  newPath;
+
+	NodePtr currentPtr;
+	NodePtr previousPtr;
+
+	while (currentPtr != NULL && strcmp(currentPtr->name, node1name)){
+
+	}
 }
