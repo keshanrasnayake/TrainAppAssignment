@@ -86,12 +86,41 @@ void createnode(char *namePtr, NodePtr *Ptr){
 }
 
 void joinnode(char *node1name, char *node2name, int weight, char track, Node *Ptr){
+	
 	EdgePtr  newPath;
-
-	NodePtr currentPtr;
-	NodePtr previousPtr;
-
+	newPath = malloc(sizeof(Edge));
+	NodePtr currentPtr = Ptr;
+	NodePtr previousPtr = NULL;
+	NodePtr node1;
+	NodePtr node2;
 	while (currentPtr != NULL && strcmp(currentPtr->name, node1name)){
+		previousPtr = currentPtr;
+		currentPtr = currentPtr->next;
+	}
+	if (previousPtr == NULL){
+		printf("No available nodes. Please add first.");
+	}
+	else{
+		if (currentPtr == NULL){
+			printf("Node not found. Check again.");
+		}
+		
+		else{
+			node1 = currentPtr;
+			currentPtr = Ptr;
+			previousPtr = NULL;
+			while (currentPtr != NULL && strcmp(currentPtr->name, node2name)){
+				previousPtr = currentPtr;
+				currentPtr = currentPtr->next;
+			}
+			if (currentPtr == NULL){
+				printf("Node not found. Check again.");
+			}
+			else{
+				node2 = currentPtr;
 
+
+			}
+		}
 	}
 }
