@@ -20,12 +20,13 @@ struct node{
 	struct node *next;
 	struct node *parentn;
 };
+
 struct edge{
 	int weight;
 	char track;
 	struct node *adj;
 };
-void createnode(char *namePtr, NodePtr Ptr);
+void createnode(char *namePtr, NodePtr *Ptr);
 void joinnode(char *node1name, char *node2name, int weight, char track, Node *Ptr);
 void Dijkstra(NodePtr Ptr, char *start, char *end);
 void initialize(NodePtr Ptr, NodePtr start);
@@ -36,26 +37,21 @@ void tracepath(NodePtr Start, NodePtr End, NodePtr Ptr);
 void main(){
 	printf("%d", infin);
 
-	NodePtr startPtr = NULL;
-	char city_name[30];
-	char city1[30];
-	char city2[30];
-	char line = 'n';
-	int dist = 0;
-
-	char *city1Prt = city1;
-	char *city2Ptr = city2;
-	char *namePtr = city_name;
-	char *linePtr = line;
-	int *distPtr = dist;
-
-
 	NodePtr Start = NULL;
 
-	createnode("Dejvicka", Start);
-	createnode("Namesti Republiky", Start);
-	joinnode("Dejvicka", "Namesti Republiky", 5, 'a', Start);
+	createnode("Dejvicka", &Start);
+	createnode("Namesti Republiky", &Start);
+	createnode("Hradcanska", &Start);
+	createnode("Malostranska", &Start);
 
+	joinnode("Dejvicka", "Hradcanska", 1, 'A', &Start);
+	joinnode("Hradcanska", "Malostranska", 2, 'A', &Start);
+	Dijkstra(&Start, "Dejvicka", "Hradcanska");
+
+	/*NodePtr nodes = locate(&Start, "Dejvicka");
+	char name[30];
+	strcpy(name,nodes->name) ;
+	printf("%s", locate(&Start, "Dejvicka"));*/
 	getchar();
 }
 
@@ -68,18 +64,24 @@ void createnode(char *namePtr, NodePtr *Ptr){
 		strcpy(newPtr->name, namePtr);
 		newPtr->next = NULL;
 		newPtr->upper_bound = infin;
+		newPtr->parentn = NULL;
+		newPtr->color = 'w';
+		for (int i = 0; i < 4; i++){
+			newPtr->edges[i] = NULL;
+		}
 		previousPtr = NULL;
-		currentPtr = Ptr;
+		currentPtr = *Ptr;
 		while (currentPtr != NULL){
 			previousPtr = currentPtr;
 			currentPtr = currentPtr->next;
 		}
 		if (previousPtr == NULL){
-			Ptr = newPtr;
+			*Ptr = newPtr;
 		}
 		else{
-			currentPtr = newPtr;
+			previousPtr->next = newPtr;
 		}
+		printf("Node successfully added. \n");
 	}
 	else
 	{
@@ -87,21 +89,27 @@ void createnode(char *namePtr, NodePtr *Ptr){
 	}
 }
 
-void joinnode(char *node1name, char *node2name, int weight, char track, Node *Ptr) {
+void joinnode(char *node1name, char *node2name, int *weight, char *track, NodePtr *Ptr) {
 
 	EdgePtr  leftPath;
 	leftPath = malloc(sizeof(Edge));
 	EdgePtr rightPath;
 	rightPath = malloc(sizeof(Edge));
-	NodePtr currentPtr = Ptr;
+	leftPath->track = track;
+	leftPath->weight = weight;
+	rightPath->weight = weight;
+	rightPath->track = track;
+	NodePtr currentPtr = *Ptr;
 	NodePtr previousPtr = NULL;
 	NodePtr node1;
 	NodePtr node2;
+
+
 	while (currentPtr != NULL && strcmp(currentPtr->name, node1name)){
 		previousPtr = currentPtr;
 		currentPtr = currentPtr->next;
 	}
-	if (previousPtr == NULL){
+	if (strcmp(currentPtr->name, node1name) != 0 && previousPtr == NULL){
 		printf("No available nodes. Please add first.");
 	}
 	else{
@@ -111,7 +119,7 @@ void joinnode(char *node1name, char *node2name, int weight, char track, Node *Pt
 
 		else{
 			node1 = currentPtr;
-			currentPtr = Ptr;
+			currentPtr = *Ptr;
 			previousPtr = NULL;
 			while (currentPtr != NULL && strcmp(currentPtr->name, node2name)){
 				previousPtr = currentPtr;
@@ -126,24 +134,26 @@ void joinnode(char *node1name, char *node2name, int weight, char track, Node *Pt
 				for (int i = 0; i < 4; i++){
 					if (node1->edges[i] == NULL){
 						node1->edges[i] = leftPath;
+						leftPath->adj = node2;
 						break;
 
 					}
-					for (int i = 0; i < 4; i++){
-						if (node2->edges[i] == NULL){
-							node2->edges[i] = rightPath;
-							break;
-						}
+				}
+				for (int i = 0; i < 4; i++){
+					if (node2->edges[i] == NULL){
+						node2->edges[i] = rightPath;
+						rightPath->adj = node1;
+						break;
 					}
 				}
+				printf("Nodes successfully joined.\n");
 			}
-
 		}
 	}
 }
 
-NodePtr locate(NodePtr Ptr, char *Node){
-	NodePtr currentPtr = Ptr;
+NodePtr locate(NodePtr *Ptr, char Node){
+	NodePtr currentPtr = *Ptr;
 	NodePtr previousPtr = NULL;
 
 	while (currentPtr != NULL && strcmp(Node, currentPtr->name) != 0){
@@ -154,8 +164,8 @@ NodePtr locate(NodePtr Ptr, char *Node){
 }
 
 
-void initialize(NodePtr Ptr, NodePtr start){
-	NodePtr currentPtr = Ptr;
+void initialize(NodePtr *Ptr, NodePtr start){
+	NodePtr currentPtr = *Ptr;
 	NodePtr previousPtr = NULL;
 
 	while (currentPtr != NULL){
@@ -181,30 +191,36 @@ void relax(NodePtr currentNode, EdgePtr Edge){
 		adjacentNode->upper_bound = current_weight;
 		adjacentNode->parentn = currentNode;
 		strcpy(adjacentNode->parent, currentNode->name);
+		printf("Relaxed %s node with weight %d\n", adjacentNode->name, current_weight);
 	}
 
 }
 
-NodePtr extract_lowbound(NodePtr Ptr){
-	NodePtr currentPtr = Ptr;
+NodePtr extract_lowbound(NodePtr *Ptr){
+	NodePtr currentPtr = *Ptr;
 	NodePtr previousPtr = NULL;
 	NodePtr minNode = NULL;
 
 	int min = INT_MAX;
 
-	while (currentPtr != NULL && currentPtr->upper_bound < min && currentPtr->color == 'w'){
-		min = currentPtr->upper_bound;
-		minNode = currentPtr;
+	while (currentPtr != NULL){
+		if (currentPtr->upper_bound < min && currentPtr->color == 'w'){
+			min = currentPtr->upper_bound;
+			minNode = currentPtr;
+		}
+		currentPtr = currentPtr->next;
 	}
 
 	return minNode;
 }
 
-void Dijkstra(NodePtr Ptr, char *start, char *end){
-	NodePtr currentPtr = Ptr;
-	NodePtr previousPtr = NULL;
+void Dijkstra(NodePtr *Ptr, char *start, char *end){
+	NodePtr currentPtr;
+	currentPtr = *Ptr;
+	NodePtr previousPtr;
+	previousPtr = NULL;
 
-	while (currentPtr != NULL && currentPtr->name != start) {
+	while (currentPtr != NULL && strcmp(currentPtr->name, start) != 0) {
 		previousPtr = currentPtr;
 		currentPtr = currentPtr->next;
 	}
@@ -221,10 +237,11 @@ void Dijkstra(NodePtr Ptr, char *start, char *end){
 			}
 		}
 	}
+	printf("successful\n");
 }
 
 
-void tracePath(NodePtr Ptr, char * start, char *end){
+void tracePath(NodePtr *Ptr, char * start, char *end){
 	NodePtr endNode = locate(Ptr, end);
 	Dijkstra(Ptr, start, end);
 	NodePtr currentPtr = endNode;
