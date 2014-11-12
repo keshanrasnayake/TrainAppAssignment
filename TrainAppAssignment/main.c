@@ -26,6 +26,8 @@ struct edge{
 	char track;
 	struct node *adj;
 };
+
+/*
 void createnode(char *namePtr, NodePtr *Ptr);
 void joinnode(char *node1name, char *node2name, int weight, char track, Node *Ptr);
 void Dijkstra(NodePtr Ptr, char *start, char *end);
@@ -33,27 +35,8 @@ void initialize(NodePtr Ptr, NodePtr start);
 void relax(NodePtr currentNode, EdgePtr Edge);
 NodePtr extract_lowbound(NodePtr Ptr);
 void tracepath(NodePtr Start, NodePtr End, NodePtr Ptr);
+*/
 
-void main(){
-	printf("%d", infin);
-
-	NodePtr Start = NULL;
-
-	createnode("Dejvicka", &Start);
-	createnode("Namesti Republiky", &Start);
-	createnode("Hradcanska", &Start);
-	createnode("Malostranska", &Start);
-
-	joinnode("Dejvicka", "Hradcanska", 1, 'A', &Start);
-	joinnode("Hradcanska", "Malostranska", 2, 'A', &Start);
-	Dijkstra(&Start, "Dejvicka", "Hradcanska");
-
-	/*NodePtr nodes = locate(&Start, "Dejvicka");
-	char name[30];
-	strcpy(name,nodes->name) ;
-	printf("%s", locate(&Start, "Dejvicka"));*/
-	getchar();
-}
 
 void createnode(char *namePtr, NodePtr *Ptr){
 	NodePtr currentPtr;
@@ -103,7 +86,7 @@ void joinnode(char *node1name, char *node2name, int *weight, char *track, NodePt
 	NodePtr previousPtr = NULL;
 	NodePtr node1;
 	NodePtr node2;
-
+	
 
 	while (currentPtr != NULL && strcmp(currentPtr->name, node1name)){
 		previousPtr = currentPtr;
@@ -143,7 +126,7 @@ void joinnode(char *node1name, char *node2name, int *weight, char *track, NodePt
 					if (node2->edges[i] == NULL){
 						node2->edges[i] = rightPath;
 						rightPath->adj = node1;
-						break;
+						break;	
 					}
 				}
 				printf("Nodes successfully joined.\n");
@@ -152,7 +135,7 @@ void joinnode(char *node1name, char *node2name, int *weight, char *track, NodePt
 	}
 }
 
-NodePtr locate(NodePtr *Ptr, char Node){
+NodePtr locate(NodePtr *Ptr, char *Node){
 	NodePtr currentPtr = *Ptr;
 	NodePtr previousPtr = NULL;
 
@@ -202,7 +185,7 @@ NodePtr extract_lowbound(NodePtr *Ptr){
 	NodePtr minNode = NULL;
 
 	int min = INT_MAX;
-
+	
 	while (currentPtr != NULL){
 		if (currentPtr->upper_bound < min && currentPtr->color == 'w'){
 			min = currentPtr->upper_bound;
@@ -219,19 +202,19 @@ void Dijkstra(NodePtr *Ptr, char *start, char *end){
 	currentPtr = *Ptr;
 	NodePtr previousPtr;
 	previousPtr = NULL;
-
-	while (currentPtr != NULL && strcmp(currentPtr->name, start) != 0) {
+	
+	while (currentPtr != NULL && strcmp(currentPtr->name,start) != 0) {
 		previousPtr = currentPtr;
 		currentPtr = currentPtr->next;
 	}
 	NodePtr startPtr = currentPtr;
 	initialize(Ptr, startPtr);
 	NodePtr checkNode = extract_lowbound(Ptr);
-	while (checkNode != NULL && (strcmp(end, checkNode->name) != 0)){
+	while (checkNode != NULL && (strcmp(end,checkNode->name)!= 0) ){
 		checkNode = extract_lowbound(Ptr);
 		checkNode->color = 'b';
-		for (int i = 0; i < 4; i++){
-			if (checkNode->edges[i] != NULL){
+		for (int i = 0; i < 4;i++){
+			if (checkNode->edges[i] != NULL  ){
 				EdgePtr checkEdge = checkNode->edges[i];
 				relax(checkNode, checkEdge);
 			}
@@ -243,11 +226,32 @@ void Dijkstra(NodePtr *Ptr, char *start, char *end){
 
 void tracePath(NodePtr *Ptr, char * start, char *end){
 	NodePtr endNode = locate(Ptr, end);
-	Dijkstra(Ptr, start, end);
+	Dijkstra(Ptr, start,end);
 	NodePtr currentPtr = endNode;
 	while (currentPtr != NULL && strcmp(currentPtr->name, start) != 0){
-		printf("%s", currentPtr->name);
-		currentPtr = currentPtr->next;
+		printf("%s \n", currentPtr->name);
+		currentPtr = currentPtr->parentn;
 	}
-	printf("%s", currentPtr->name);
+	printf("%s \n", currentPtr->name);
+}
+
+void main(){
+	printf("%d", infin);
+
+	NodePtr Start = NULL;
+
+	createnode("Dejvicka", &Start);
+	createnode("Namesti Republiky", &Start);
+	createnode("Hradcanska", &Start);
+	createnode("Malostranska", &Start);
+
+	joinnode("Dejvicka", "Hradcanska", 1, 'A', &Start);
+	joinnode("Hradcanska", "Malostranska", 2, 'A', &Start);
+	Dijkstra(&Start, "Dejvicka", "Hradcanska");
+	tracePath(&Start, "Dejvicka", "Malostranska");
+	/*NodePtr nodes = locate(&Start, "Dejvicka");
+	char name[30];
+	strcpy(name,nodes->name) ;
+	printf("%s", locate(&Start, "Dejvicka"));*/
+	getchar();
 }
